@@ -16,25 +16,49 @@ app.use(express.json());
 
 // 질문 데이터를 언어별로 분리 (총 8개 질문)
 const questions_ko = [
-    {id: 1, text: "주말 저녁, 에너지를 재충전하기 위해 당신은 주로 무엇을 하나요? 혼자만의 시간을 보내나요, 아니면 친구들과 어울리나요? 그 이유는 무엇인가요?"}, // E/I
-    {id: 2, text: "새로운 사람들과 만나는 자리에서, 당신은 먼저 말을 거는 편인가요, 아니면 상대방이 다가오기를 기다리는 편인가요? 그 이유는 무엇인가요?"}, // E/I 추가
-    {id: 3, text: "새로운 프로젝트를 시작할 때, 당신은 어떤 정보에 더 끌리나요? 이미 검증된 사실과 구체적인 데이터인가요, 아니면 전체적인 그림과 미래의 가능성인가요?"}, // S/N
-    {id: 4, text: "어떤 물건을 살 때, 당신은 실제 사용 후기와 구체적인 스펙을 꼼꼼히 확인하는 편인가요, 아니면 디자인이나 느낌, 전반적인 평판에 더 영향을 받나요?"}, // S/N 추가
-    {id: 5, text: "친구가 어려운 결정을 앞두고 조언을 구할 때, 당신은 보통 어떻게 반응하나요? 객관적인 장단점을 분석해주나요, 아니면 친구의 감정과 관계에 미칠 영향을 먼저 고려하나요?"}, // T/F
-    {id: 6, text: "팀 프로젝트에서 갈등이 발생했을 때, 당신은 문제의 '논리적 해결'에 집중하는 편인가요, 아니면 팀원들 간의 '화합과 분위기'를 더 중요하게 생각하나요?"}, // T/F 추가
-    {id: 7, text: "여행을 계획할 때, 당신의 스타일은 어떤가요? 모든 일정을 시간대별로 꼼꼼하게 짜는 편인가요, 아니면 큰 틀만 정해두고 현지 상황에 따라 즉흥적으로 움직이는 것을 즐기나요?"}, // J/P
-    {id: 8, text: "갑자기 생긴 여유 시간에 당신은 무엇을 할 가능성이 더 큰가요? 미리 계획된 활동을 시작하나요, 아니면 그 순간 하고 싶은 일을 찾아 자유롭게 시간을 보내나요?"}  // J/P 추가
+    {id: 1, text: "정신없이 바빴던 한 주가 끝났습니다. 이번 주말, 당신의 이상적인 재충전 방식은 무엇인가요? 자세히 설명해주세요."}, // E/I
+    {id: 2, text: "관심 있는 주제로 가득한 파티에 초대되었습니다. 그곳에서 당신은 주로 어떻게 시간을 보낼 것 같나요?"}, // E/I
+    {id: 3, text: "지금껏 없었던 새로운 방식의 스마트폰이 출시되었습니다. 구매를 결정하기까지 당신의 생각 과정은 어떨 것 같나요?"}, // S/N
+    {id: 4, text: "친한 친구가 '지금 하는 일이 나랑 안 맞는 것 같아'라며 고민을 털어놓습니다. 당신의 첫 반응은 무엇일까요?"}, // S/N
+    {id: 5, text: "오랫동안 계획했던 중요한 약속과, 도움이 꼭 필요한 친구의 갑작스러운 부탁이 겹쳤습니다. 어떻게 결정하실 건가요?"}, // T/F
+    {id: 6, text: "당신이 리더인 팀 프로젝트에서 팀원들의 의견이 크게 엇갈리고 있습니다. 이 상황을 어떻게 해결해 나갈 건가요?"}, // T/F
+    {id: 7, text: "한 달간의 자유로운 해외여행 기회가 생겼습니다. 어떻게 여행을 준비하고 즐길 건가요? 당신의 여행 스타일을 들려주세요."}, // J/P
+    {id: 8, text: "오늘 해야 할 일 목록이 있지만, 갑자기 흥미로운 전시회 소식을 들었습니다. 당신의 선택은 무엇이며 그 이유는 무엇인가요?"}  // J/P
 ];
 
 const questions_en = [
-    {id: 1, text: "On a weekend evening, what do you usually do to recharge your energy? Do you spend time alone, or do you socialize with friends? What is your reason?"}, // E/I
-    {id: 2, text: "When meeting new people, do you usually initiate conversations, or do you wait for others to approach you? Why?"}, // E/I Added
-    {id: 3, text: "When starting a new project, what kind of information are you more drawn to? Verified facts and concrete data, or the bigger picture and future possibilities?"}, // S/N
-    {id: 4, text: "When buying something, do you meticulously check actual user reviews and specific specs, or are you more influenced by design, feel, or general reputation?"}, // S/N Added
-    {id: 5, text: "When a friend asks for advice on a difficult decision, how do you usually respond? Do you analyze objective pros and cons, or do you first consider your friend's feelings and the impact on relationships?"}, // T/F
-    {id: 6, text: "When a conflict arises in a team project, do you tend to focus on 'logical problem-solving' or do you prioritize 'harmony and atmosphere' among team members?"}, // T/F Added
-    {id: 7, text: "When planning a trip, what is your style? Do you meticulously plan every detail by the hour, or do you prefer to set a general framework and spontaneously adjust based on local circumstances?"}, // J/P
-    {id: 8, text: "When you suddenly have free time, what are you more likely to do? Start a pre-planned activity, or freely spend the time finding something you feel like doing at that moment?"} // J/P Added
+    {
+        id: 1,
+        text: "A hectic week has finally ended. What is your ideal way to recharge this weekend? Please describe in detail."
+    }, // E/I
+    {
+        id: 2,
+        text: "You've been invited to a party full of topics that interest you. How do you think you'll spend your time there?"
+    }, // E/I
+    {
+        id: 3,
+        text: "A new type of smartphone, unlike any before, has been released. What would your thought process be before deciding to buy it?"
+    }, // S/N
+    {
+        id: 4,
+        text: "A close friend confides in you, saying, 'I don't think my current job is the right fit for me.' What would be your initial reaction?"
+    }, // S/N
+    {
+        id: 5,
+        text: "An important, long-planned appointment conflicts with a sudden request from a friend who desperately needs your help. How will you decide?"
+    }, // T/F
+    {
+        id: 6,
+        text: "In a team project you're leading, team members have strongly conflicting opinions. How would you resolve this situation?"
+    }, // T/F
+    {
+        id: 7,
+        text: "You have a chance for a month-long, flexible trip abroad. How will you prepare for and enjoy the trip? Tell us about your travel style."
+    }, // J/P
+    {
+        id: 8,
+        text: "You have a to-do list for today, but you suddenly hear about an interesting exhibition. What would you choose to do and why?"
+    } // J/P
 ];
 
 
@@ -62,8 +86,14 @@ async function getAiAnalysis(answers, language) {
     Return the result ONLY as a clean JSON object without any other text or markdown formatting or markdown backticks.
     ${langInstruction}
     The JSON format must be:
-    {
+   {
       "mbti_type": "string",
+      "scores": {
+        "ei": "number between -100 and 100",
+        "sn": "number between -100 and 100",
+        "tf": "number between -100 and 100",
+        "jp": "number between -100 and 100"
+      },
       "analysis": {
         "ei": { "type": "E or I", "reason": "brief justification" },
         "sn": { "type": "S or N", "reason": "brief justification" },

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'; // useRef import
+import React, {useState, useEffect, useRef} from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -12,7 +12,7 @@ const texts = {
         loadingQuestions: "질문 로딩 중...",
         analyzing: "AI가 당신의 답변을 분석중입니다...",
         allQuestionsAnswered: "모든 질문에 답변해주세요.",
-        answerRequired: "답변을 입력해주세요.", // Added for validation
+        answerRequired: "답변을 입력해주세요.",
         analysisError: "분석 중 오류가 발생했습니다.",
         resultTitle: "분석 결과:",
         retryButton: "다시하기",
@@ -29,7 +29,7 @@ const texts = {
         loadingQuestions: "Loading questions...",
         analyzing: "AI is analyzing your answers...",
         allQuestionsAnswered: "Please answer all questions.",
-        answerRequired: "Please enter your answer.", // Added for validation
+        answerRequired: "Please enter your answer.",
         analysisError: "An error occurred during analysis.",
         resultTitle: "Analysis Result:",
         retryButton: "Try Again",
@@ -49,11 +49,10 @@ function App() {
     const [result, setResult] = useState(null);
     const [isTestStarted, setIsTestStarted] = useState(false);
     const [language, setLanguage] = useState('ko');
-    const textareaRef = useRef(null); // useRef 훅으로 textarea 참조
+    const textareaRef = useRef(null);
 
     const currentTexts = texts[language];
 
-    // 질문 불러오기 (언어 변경 시 다시 불러오도록 dependency 추가)
     useEffect(() => {
         axios.get(`${API_URL}/api/questions?lang=${language}`)
             .then(response => {
@@ -64,7 +63,6 @@ function App() {
             .catch(error => console.error("Error fetching questions:", error));
     }, [language]);
 
-    // currentQuestionIndex 또는 questions가 변경될 때마다 textarea에 포커스
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.focus();
@@ -77,7 +75,6 @@ function App() {
     };
 
     const handleNext = () => {
-        // 현재 질문의 답변이 비어있는지 확인
         const currentQuestionId = questions[currentQuestionIndex].id;
         if (!answers[currentQuestionId] || answers[currentQuestionId].trim() === '') {
             alert(currentTexts.answerRequired);
@@ -86,8 +83,6 @@ function App() {
 
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(prev => prev + 1);
-            // 다음 질문으로 넘어가면 textarea에 자동으로 포커스
-            // 이 로직은 useEffect에서 처리되므로 여기서 추가적으로 호출할 필요 없음.
         }
     };
 
@@ -97,9 +92,7 @@ function App() {
         }
     };
 
-    // 답변 제출 및 결과 요청
     const handleSubmit = async () => {
-        // 마지막 질문의 답변 유효성 검사
         const currentQuestionId = questions[currentQuestionIndex].id;
         if (!answers[currentQuestionId] || answers[currentQuestionId].trim() === '') {
             alert(currentTexts.answerRequired);
@@ -130,11 +123,25 @@ function App() {
         setResult(null);
     };
 
-    // 현재 질문의 답변이 비어있는지 확인하는 헬퍼 함수
     const isCurrentAnswerEmpty = () => {
-        if (!questions.length) return true; // 질문이 로드되지 않았으면 비어있는 것으로 간주
+        if (!questions.length) return true;
         const currentQuestionId = questions[currentQuestionIndex]?.id;
         return !answers[currentQuestionId] || answers[currentQuestionId].trim() === '';
+    };
+
+    // 점수를 백분율로 변환하고, 해당 문자를 결정하는 헬퍼 함수
+    const formatScore = (score, typeA, typeB) => {
+        let percentage;
+        let preferenceType;
+
+        if (score >= 0) {
+            percentage = score;
+            preferenceType = typeA;
+        } else {
+            percentage = Math.abs(score);
+            preferenceType = typeB;
+        }
+        return `${preferenceType} (${percentage}%)`;
     };
 
     if (!isTestStarted) {
@@ -160,6 +167,10 @@ function App() {
     }
 
     if (result) {
+        // 백엔드에서 score 필드가 항상 온다고 가정합니다.
+        // 만약 score가 없을 수 있다면, 여기에 안전한 널 체크를 추가해야 합니다.
+        const scores = result.scores || {}; // score 필드가 없을 경우를 대비하여 빈 객체 할당
+
         return (
             <div className="container result-container">
                 <div className="language-selector">
@@ -170,10 +181,18 @@ function App() {
                 </div>
                 <h1>{currentTexts.resultTitle} {result.mbti_type}</h1>
                 <div className="analysis-box">
-                    <p><strong>{result.analysis.ei.type}:</strong> {result.analysis.ei.reason}</p>
-                    <p><strong>{result.analysis.sn.type}:</strong> {result.analysis.sn.reason}</p>
-                    <p><strong>{result.analysis.tf.type}:</strong> {result.analysis.tf.reason}</p>
-                    <p><strong>{result.analysis.jp.type}:</strong> {result.analysis.jp.reason}</p>
+                    <p>
+                        <strong>{result.analysis.ei.type} ({formatScore(scores.ei, 'E', 'I')}):</strong> {result.analysis.ei.reason}
+                    </p>
+                    <p>
+                        <strong>{result.analysis.sn.type} ({formatScore(scores.sn, 'S', 'N')}):</strong> {result.analysis.sn.reason}
+                    </p>
+                    <p>
+                        <strong>{result.analysis.tf.type} ({formatScore(scores.tf, 'T', 'F')}):</strong> {result.analysis.tf.reason}
+                    </p>
+                    <p>
+                        <strong>{result.analysis.jp.type} ({formatScore(scores.jp, 'J', 'P')}):</strong> {result.analysis.jp.reason}
+                    </p>
                 </div>
                 <button onClick={() => {
                     setResult(null);
@@ -199,18 +218,20 @@ function App() {
                     <h2>{currentTexts.question} {currentQuestionIndex + 1}/{questions.length}</h2>
                     <p>{questions[currentQuestionIndex].text}</p>
                     <textarea
-                        ref={textareaRef} // ref 연결
+                        ref={textareaRef}
                         rows="8"
                         value={answers[questions[currentQuestionIndex].id] || ''}
                         onChange={(e) => handleAnswerChange(questions[currentQuestionIndex].id, e.target.value)}
                         placeholder={currentTexts.placeholder}
                     />
                     <div className="button-group">
-                        <button onClick={handleBack} disabled={currentQuestionIndex === 0}>{currentTexts.previous}</button>
+                        <button onClick={handleBack}
+                                disabled={currentQuestionIndex === 0}>{currentTexts.previous}</button>
                         {currentQuestionIndex < questions.length - 1 ? (
-                            <button onClick={handleNext} disabled={isCurrentAnswerEmpty()}>{currentTexts.next}</button> // 조건부 비활성화
+                            <button onClick={handleNext} disabled={isCurrentAnswerEmpty()}>{currentTexts.next}</button>
                         ) : (
-                            <button onClick={handleSubmit} className="submit-btn" disabled={isCurrentAnswerEmpty()}>{currentTexts.analyzeResult}</button> // 조건부 비활성화
+                            <button onClick={handleSubmit} className="submit-btn"
+                                    disabled={isCurrentAnswerEmpty()}>{currentTexts.analyzeResult}</button>
                         )}
                     </div>
                 </div>
